@@ -5,16 +5,19 @@ import json
 from PIL import Image
 import io
 
-# --- 클라이언트 초기화 ---
-# 라이브러리가 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 사용합니다.
-try:
-    client = genai.Client()
-except Exception as e:
-    st.error("Google API 키를 사용하여 Gemini 클라이언트를 초기화하는 데 실패했습니다.")
-    client = None
+@st.cache_resource
+def get_gemini_client():
+    try:
+        client = genai.Client()
+        return client
+    except Exception as e:
+        # st.secrets에 키가 없는 경우 등, 여기서 치명적인 오류가 발생하면 앱에 에러를 표시합니다.
+        st.error(f"Google API 키를 사용하여 Gemini 클라이언트를 초기화하는 데 실패했습니다: {e}")
+        return None
 
-# --- Gemini Vision OCR 함수 ---
+# --- Gemini Vision OCR 함수 수정 ---
 def ocr_with_gemini(image_bytes):
+    client = get_gemini_client() # 함수가 호출될 때마다 캐시된 클라이언트 객체를 가져옵니다.
     if not client:
         return None
     
@@ -22,9 +25,8 @@ def ocr_with_gemini(image_bytes):
         img = Image.open(io.BytesIO(image_bytes))
         prompt = "Extract all text from this image. Provide only the transcribed text, without any additional commentary or formatting."
         
-        # client.models.generate_content 사용
         response = client.models.generate_content(
-            model="gemini-2.5-flash", # Vision 기능에 flash 모델 사용
+            model="gemini-2.5-flash",
             contents=[prompt, img]
         )
         return response.text
@@ -32,8 +34,9 @@ def ocr_with_gemini(image_bytes):
         st.error(f"Gemini Vision API 호출 중 오류 발생: {e}")
         return None
 
-# --- 역량 분석 함수 ---
+# --- 역량 분석 함수 수정 ---
 def analyze_competency_gemini(job_description, user_experience):
+    client = get_gemini_client() # 함수가 호출될 때마다 캐시된 클라이언트 객체를 가져옵니다.
     if not client:
         return None
 
@@ -56,10 +59,9 @@ def analyze_competency_gemini(job_description, user_experience):
     }}
     """
     try:
-        # client.models.generate_content 사용
         response = client.models.generate_content(
-            model="gemini-2.5-pro", # 역량 분석에 pro 모델 사용
-            contents=prompt,
+            model="gemini-2.5-pro",
+            contents=prompt,    
             config={
                 "response_mime_type": "application/json"
             }
