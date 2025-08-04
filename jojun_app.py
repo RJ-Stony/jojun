@@ -60,7 +60,7 @@ st.write("채용 공고와 당신의 경험을 모든 방식으로 분석하여 
 # --- 수정된 부분: API 키 존재 여부를 스크립트 최상단에서 한 번만 확인 ---
 try:
     # 배포 환경: Streamlit Secrets에 키가 있는지 확인
-    st.secrets["GOOGLE_API_KEY"]
+    _ = st.secrets["GOOGLE_API_KEY"]
     google_api_key_exists = True
 except (StreamlitSecretNotFoundError, KeyError):
     # 로컬 환경: .env에서 로드된 환경 변수에 키가 있는지 확인
