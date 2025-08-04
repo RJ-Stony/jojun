@@ -56,7 +56,7 @@ JOJUN은 구직자들이 채용 공고와 자신의 경험을 AI로 분석받아
 
 ### Backend & AI
 
-- **Python 3.x**: 메인 프로그래밍 언어
+- **Python 3.12**: 메인 프로그래밍 언어
 - **Google Gemini AI**: 텍스트 분석 및 이미지 OCR
 - **Streamlit**: 웹 애플리케이션 프레임워크
 
@@ -270,23 +270,5 @@ jojun/
 export PYTHONPATH=.
 python -m streamlit run jojun_app.py --logger.level debug
 ```
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
-
-## 🤝 기여하기
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📞 문의
-
-프로젝트에 대한 문의사항이나 버그 리포트는 이슈를 통해 제출해주세요.
-
----
 
 **JOJUN**으로 당신의 꿈의 직장 합격을 조준하세요! 🎯
