@@ -78,7 +78,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.header("📄 채용 공고")
-    url_input = st.text_input("1. 채용 공고 URL을 붙여넣으세요.")
+    url_input = st.text_input("채용 공고 URL을 붙여넣어주세요.")
     if url_input:
         try:
             headers = {'User-Agent': 'Mozilla/5.0'}
@@ -90,9 +90,8 @@ with col1:
         except Exception as e:
             st.error(f"URL 처리 중 오류가 발생했습니다: {e}")
 
-    st.markdown("---")
-    st.write("2. 또는, 클립보드의 이미지를 바로 붙여넣으세요.")
-    paste_result = paste_image_button("📋 이미지 붙여넣기 (Ctrl+V)", key="paste_button")
+    st.write("혹은 클립보드의 이미지를 바로 붙여넣어주세요.")
+    paste_result = paste_image_button("📋 클릭해서 이미지 붙여넣기", key="paste_button")
     
     if paste_result.image_data is not None and paste_result.image_data != st.session_state.last_pasted_image_data:
         st.session_state.last_pasted_image_data = paste_result.image_data
@@ -106,9 +105,9 @@ with col1:
             st.info("이미지 텍스트가 아래 텍스트 박스에 추가되었습니다.")
         st.rerun()
 
-    st.text_area("3. 공고 내용 확인 및 직접 수정", key="jd_text", height=250)
+    st.text_area("공고 내용 확인 및 직접 수정", key="jd_text", height=250)
     jd_files = st.file_uploader(
-        "4. 또는, 공고 파일을 업로드하세요.",
+        "혹은 공고 파일을 직접 업로드해주세요.",
         type=["pdf", "pptx", "txt", "md", "jpg", "jpeg", "png"],
         accept_multiple_files=True,
         key="jd_uploader"
@@ -116,9 +115,9 @@ with col1:
 
 with col2:
     st.header("🧑‍💻 나의 경험")
-    st.text_area("1. 경험/이력 내용을 직접 붙여넣으세요.", key="my_exp_text", height=415)
+    st.text_area("경험/이력 내용을 직접 붙여넣어주세요.", key="my_exp_text", height=415)
     my_files = st.file_uploader(
-        "2. 또는, 포트폴리오 파일을 업로드하세요.",
+        "혹은 포트폴리오 파일을 직접 업로드해주세요.",
         type=["pdf", "pptx", "txt", "md"],
         accept_multiple_files=True,
         key="my_files_uploader"

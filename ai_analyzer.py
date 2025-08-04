@@ -5,38 +5,36 @@ import json
 from PIL import Image
 import io
 
-# --- 클라이언트 및 모델 초기화 ---
+# --- 클라이언트 초기화 ---
+# 라이브러리가 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 사용합니다.
 try:
-    # 라이브러리가 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 사용합니다.
-    vision_model = genai.GenerativeModel('gemini-2.5-flash')
-    pro_model = genai.GenerativeModel('gemini-2.5-pro')
+    client = genai.Client()
 except Exception as e:
-    # --- 수정된 부분: 민감한 정보가 포함될 수 있는 상세 오류 메시지를 제거 ---
-    st.error("Google API 키를 사용하여 Gemini 모델을 초기화하는 데 실패했습니다. Streamlit Secrets 설정을 확인해주세요.")
-    # st.error(f"오류 상세: {e}") # 보안 취약점이 있는 코드 라인 삭제
-    vision_model = None
-    pro_model = None
+    st.error("Google API 키를 사용하여 Gemini 클라이언트를 초기화하는 데 실패했습니다.")
+    client = None
 
-# --- Gemini Vision OCR 함수 (변경 없음) ---
+# --- Gemini Vision OCR 함수 ---
 def ocr_with_gemini(image_bytes):
-    if not vision_model:
-        st.error("Gemini Vision 모델이 초기화되지 않았습니다.")
+    if not client:
         return None
     
     try:
         img = Image.open(io.BytesIO(image_bytes))
         prompt = "Extract all text from this image. Provide only the transcribed text, without any additional commentary or formatting."
         
-        response = vision_model.generate_content([prompt, img])
+        # client.models.generate_content 사용
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", # Vision 기능에 flash 모델 사용
+            contents=[prompt, img]
+        )
         return response.text
     except Exception as e:
         st.error(f"Gemini Vision API 호출 중 오류 발생: {e}")
         return None
 
-# --- 역량 분석 함수 (변경 없음) ---
+# --- 역량 분석 함수 ---
 def analyze_competency_gemini(job_description, user_experience):
-    if not pro_model:
-        st.error("Gemini Pro 모델이 초기화되지 않았습니다.")
+    if not client:
         return None
 
     prompt = f"""
@@ -58,9 +56,11 @@ def analyze_competency_gemini(job_description, user_experience):
     }}
     """
     try:
-        response = pro_model.generate_content(
+        # client.models.generate_content 사용
+        response = client.models.generate_content(
+            model="gemini-2.5-pro", # 역량 분석에 pro 모델 사용
             contents=prompt,
-            generation_config={
+            config={
                 "response_mime_type": "application/json"
             }
         )
