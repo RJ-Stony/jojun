@@ -4,6 +4,7 @@ import os
 import json
 from PIL import Image
 import io
+import logging
 
 @st.cache_resource
 def get_gemini_client():
@@ -11,8 +12,10 @@ def get_gemini_client():
         client = genai.Client()
         return client
     except Exception as e:
-        # st.secrets에 키가 없는 경우 등, 여기서 치명적인 오류가 발생하면 앱에 에러를 표시합니다.
-        st.error(f"Google API 키를 사용하여 Gemini 클라이언트를 초기화하는 데 실패했습니다: {e}")
+        # 🚨 수정: 상세 오류는 로그에만 기록
+        logging.error(f"Gemini 클라이언트 초기화 실패: {e}")
+        # 👨‍💻 사용자에게는 안전한 메시지만 표시
+        st.error("AI 서비스를 초기화하는 데 실패했습니다. 관리자에게 문의하세요.")
         return None
 
 # --- Gemini Vision OCR 함수 수정 ---
@@ -31,7 +34,8 @@ def ocr_with_gemini(image_bytes):
         )
         return response.text
     except Exception as e:
-        st.error(f"Gemini Vision API 호출 중 오류 발생: {e}")
+        logging.error(f"Gemini Vision API 호출 오류: {e}")
+        st.error("이미지 분석 중 AI 서비스에 오류가 발생했습니다.")
         return None
 
 # --- 역량 분석 함수 수정 ---
@@ -69,5 +73,6 @@ def analyze_competency_gemini(job_description, user_experience):
         analysis_result = json.loads(response.text)
         return analysis_result
     except Exception as e:
-        st.error(f"AI 분석 중 오류 발생: {e}")
+        logging.error(f"AI 역량 분석 오류: {e}")
+        st.error("역량 분석 중 AI 서비스에 오류가 발생했습니다.")
         return None
