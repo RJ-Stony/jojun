@@ -1,9 +1,9 @@
 import streamlit as st
-from google import genai
+from google import genai # types는 더 이상 사용하지 않음
+import os
 import json
 
 # genai.Client()는 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 클라이언트를 설정합니다.
-# Streamlit Secrets에 GOOGLE_API_KEY가 설정되어 있다면 그 값을 사용합니다.
 try:
     client = genai.Client()
 except Exception:
@@ -12,14 +12,13 @@ except Exception:
 
 def analyze_competency_gemini(job_description, user_experience):
     """
-    최신 Gemini Client를 사용하여 JD와 사용자 경험을 분석하고,
-    동적 역량 지표와 점수를 JSON 형태로 반환합니다.
+    Gemini 1.5 Pro 모델과 동적 사고 기능을 사용하여 JD와 사용자 경험을 분석합니다.
     """
     if not client:
         st.error("Gemini API 클라이언트가 초기화되지 않았습니다. API 키 설정을 확인하세요.")
         return None
 
-    # 제미나이에게 보낼 프롬프트
+    # 제미나이에게 보낼 프롬프트 (내용은 동일)
     prompt = f"""
     당신은 최고의 IT 채용 전문가 AI, 'JOJUN'입니다. [채용 공고]와 [지원자 경험]을 분석하여 다음 과업을 수행해주세요.
 
@@ -43,16 +42,20 @@ def analyze_competency_gemini(job_description, user_experience):
     }}
     """
     try:
-        # API 호출 (최신 방식)
+        # --- 여기부터 최종 수정된 부분 ---
+        # 모든 설정을 하나의 딕셔너리로 통합하여 전달
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-pro",
             contents=prompt,
-            generation_config={
-                "response_mime_type": "application/json"
+            config={
+                "response_mime_type": "application/json",
+                "thinking_config": {
+                    "thinking_budget": -1
+                }
             }
         )
+        # --- 여기까지 최종 수정된 부분 ---
         
-        # JSON 응답을 파싱하여 반환
         analysis_result = json.loads(response.text)
         return analysis_result
 
