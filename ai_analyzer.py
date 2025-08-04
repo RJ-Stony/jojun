@@ -1,38 +1,53 @@
 import streamlit as st
-from google import genai # types는 더 이상 사용하지 않음
+from google import genai
 import os
 import json
+from PIL import Image
+import io
 
-# genai.Client()는 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 클라이언트를 설정합니다.
+# --- 클라이언트 초기화 ---
+# 라이브러리가 자동으로 GOOGLE_API_KEY 환경 변수를 찾아 사용합니다.
 try:
     client = genai.Client()
-except Exception:
-    st.warning("Google API 키가 설정되지 않았습니다. 로컬 테스트 시에는 환경 변수로, 배포 시에는 Streamlit Secrets에 추가해야 합니다.")
+except Exception as e:
+    st.error("Google API 키를 사용하여 Gemini 클라이언트를 초기화하는 데 실패했습니다.")
+    st.error(f"오류 상세: {e}")
     client = None
 
-def analyze_competency_gemini(job_description, user_experience):
-    """
-    Gemini 1.5 Pro 모델과 동적 사고 기능을 사용하여 JD와 사용자 경험을 분석합니다.
-    """
+# --- Gemini Vision OCR 함수 ---
+def ocr_with_gemini(image_bytes):
     if not client:
-        st.error("Gemini API 클라이언트가 초기화되지 않았습니다. API 키 설정을 확인하세요.")
+        return None
+    
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        prompt = "Extract all text from this image. Provide only the transcribed text, without any additional commentary or formatting."
+        
+        # client.models.generate_content 사용
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", # Vision 기능에 flash 모델 사용
+            contents=[prompt, img]
+        )
+        return response.text
+    except Exception as e:
+        st.error(f"Gemini Vision API 호출 중 오류 발생: {e}")
         return None
 
-    # 제미나이에게 보낼 프롬프트 (내용은 동일)
+# --- 역량 분석 함수 ---
+def analyze_competency_gemini(job_description, user_experience):
+    if not client:
+        return None
+
     prompt = f"""
     당신은 최고의 IT 채용 전문가 AI, 'JOJUN'입니다. [채용 공고]와 [지원자 경험]을 분석하여 다음 과업을 수행해주세요.
-
     [과업]
     1. [채용 공고] 내용만을 바탕으로, 이 직무에서 가장 중요하게 요구되는 핵심 역량 5가지를 동적으로 선정합니다.
     2. 선정된 5개 역량에 대해, [채용 공고]가 요구하는 수준을 1점에서 100점 사이로 평가합니다.
     3. 선정된 5개 역량에 대해, [지원자 경험]이 얼마나 부합하는지를 1점에서 100점 사이로 평가합니다.
-
     [채용 공고]
     {job_description}
-
     [지원자 경험]
     {user_experience}
-
     [출력 형식]
     반드시 아래와 같은 JSON 형식으로만 응답해주세요. 다른 설명은 일체 포함하지 마세요.
     {{
@@ -42,23 +57,16 @@ def analyze_competency_gemini(job_description, user_experience):
     }}
     """
     try:
-        # --- 여기부터 최종 수정된 부분 ---
-        # 모든 설정을 하나의 딕셔너리로 통합하여 전달
+        # client.models.generate_content 사용
         response = client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-2.5-pro", # 역량 분석에 pro 모델 사용
             contents=prompt,
             config={
-                "response_mime_type": "application/json",
-                "thinking_config": {
-                    "thinking_budget": -1
-                }
+                "response_mime_type": "application/json"
             }
         )
-        # --- 여기까지 최종 수정된 부분 ---
-        
         analysis_result = json.loads(response.text)
         return analysis_result
-
     except Exception as e:
         st.error(f"AI 분석 중 오류 발생: {e}")
         return None
