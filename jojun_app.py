@@ -16,7 +16,7 @@ import os
 from streamlit.errors import StreamlitSecretNotFoundError
 from streamlit_paste_button import paste_image_button
 
-# --- 함수 정의 (이전과 동일) ---
+# --- 함수 정의 ---
 def parse_input_files(uploaded_files):
     all_text = ""
     if not uploaded_files:
@@ -57,9 +57,7 @@ st.set_page_config(layout="wide", page_title="JOJUN")
 st.title("🎯 JOJUN: AI 직무 역량 조준기")
 st.write("채용 공고와 당신의 경험을 모든 방식으로 분석하여 합격을 조준합니다.")
 
-# --- 수정된 부분: API 키 존재 여부를 스크립트 최상단에서 한 번만 확인 ---
 try:
-    # 배포 환경: Streamlit Secrets에 키가 있는지 확인
     _ = st.secrets["GOOGLE_API_KEY"]
     google_api_key_exists = True
 except (StreamlitSecretNotFoundError, KeyError):
@@ -124,7 +122,6 @@ with col2:
     )
 
 if st.button("✨ AI로 합격률 조준하기", type="primary", use_container_width=True):
-    # --- 수정된 부분: 미리 확인해 둔 변수 사용 ---
     if not google_api_key_exists:
         st.error("Google API 키가 설정되지 않았습니다. .env 파일 또는 Streamlit Secrets에 추가해주세요.")
     else:

@@ -12,15 +12,13 @@ def get_gemini_client():
         client = genai.Client()
         return client
     except Exception as e:
-        # 🚨 수정: 상세 오류는 로그에만 기록
         logging.error(f"Gemini 클라이언트 초기화 실패: {e}")
-        # 👨‍💻 사용자에게는 안전한 메시지만 표시
         st.error("AI 서비스를 초기화하는 데 실패했습니다. 관리자에게 문의하세요.")
         return None
 
-# --- Gemini Vision OCR 함수 수정 ---
+# --- Gemini Vision OCR 함수 ---
 def ocr_with_gemini(image_bytes):
-    client = get_gemini_client() # 함수가 호출될 때마다 캐시된 클라이언트 객체를 가져옵니다.
+    client = get_gemini_client()
     if not client:
         return None
     
@@ -38,10 +36,10 @@ def ocr_with_gemini(image_bytes):
         st.error("이미지 분석 중 AI 서비스에 오류가 발생했습니다.")
         return None
 
-# --- 역량 분석 함수 수정 ---
-def analyze_competency_gemini(job_description, user_experience):
-    client = get_gemini_client() # 함수가 호출될 때마다 캐시된 클라이언트 객체를 가져옵니다.
-    if not client:
+# --- 역량 분석 함수 ---
+def analyze_competency_gemini(job_description, user_experience):    
+    client = get_gemini_client()
+    if not client:  
         return None
 
     prompt = f"""
